@@ -5,6 +5,8 @@ const precacheResources = [
   'logo.png',
   'manifest.json',
   'service-worker.js',
+  '404.html',
+  'offline.html',
   'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
   'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',
   'https://code.jquery.com/jquery-3.3.1.min.js',
