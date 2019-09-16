@@ -33,9 +33,27 @@ self.addEventListener('fetch', event => {
   event.respondWith(caches.match(event.request)
     .then(cachedResponse => {
         if (cachedResponse) {
+          console.log('Found ', event.request.url, ' in cache');
           return cachedResponse;
         }
+        console.log('Networ request for ', event.request.url);
         return fetch(event.request);
+    
+        .then(cachedResponse => { 
+          if(cachedResponse.status === 404) {
+            return caches.match('404.html'); 
+          }
+          return caches.open(cacheName)
+          
+          .then(cache => {
+            cache.put(event.request.url, response.clone());
+            return cachedResponse;
+          });
+        });
+      }).catch(error=> {
+        //TODO 6 - RESPOND WITH CUSTOM OFFLINE MESSAGE
+        console.log('Error, ', error);
+        return caches.match('offline.html');
       })
     );
 });
