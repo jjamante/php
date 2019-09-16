@@ -39,7 +39,7 @@ self.addEventListener('fetch', event => {
           return cachedResponse;
         }
         console.log('Networ request for ', event.request.url);
-        return fetch(event.request);
+        return fetch(event.request)
     
         .then(cachedResponse => { 
           if(cachedResponse.status === 404) {
