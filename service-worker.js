@@ -1,10 +1,8 @@
-const cacheName = 'cache-v1';
-const precacheResources = [
-  '/',
+const filesToCache = [
+'/',
   'index.html',
   'logo.png',
   'manifest.json',
-  'service-worker.js',
   '404.html',
   'offline.html',
   'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
@@ -14,48 +12,42 @@ const precacheResources = [
   'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js'
 ];
 
-self.addEventListener('install', event => {
-  console.log('Service worker install event!');
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(cacheName)
-      .then(cache => {
-        return cache.addAll(precacheResources);
-      })
-  );
-  
-});
+const staticCacheName = 'pages-cache-v1';
 
-self.addEventListener('activate', event => {
-  console.log('Service worker activate event!');
+self.addEventListener('install', event => {
+  console.log('Attempting to install service worker and cache static assets');
+  event.waitUntil(
+    caches.open(staticCacheName)
+    .then(cache => {
+      return cache.addAll(filesToCache);
+    })
+  );
 });
 
 self.addEventListener('fetch', event => {
-  console.log('Fetch intercepted for:', event.request.url);
-  event.respondWith(caches.match(event.request)
-    .then(cachedResponse => {
-        if (cachedResponse) {
-          console.log('Found ', event.request.url, ' in cache');
-          return cachedResponse;
+  console.log('Fetch event for ', event.request.url);
+  event.respondWith(
+    caches.match(event.request)
+    .then(response => {
+      if (response) {
+        console.log('Found ', event.request.url, ' in cache');
+        return response;
+      }
+      console.log('Network request for ', event.request.url);
+      return fetch(event.request)
+      .then(response => {
+        if (response.status === 404) {
+          return caches.match('404.html');
         }
-        console.log('Networ request for ', event.request.url);
-        return fetch(event.request)
-    
-        .then(cachedResponse => { 
-          if(cachedResponse.status === 404) {
-            return caches.match('404.html'); 
-          }
-          return caches.open(cacheName)
-          
-          .then(cache => {
-            cache.put(event.request.url, response.clone());
-            return cachedResponse;
-          });
+        return caches.open(staticCacheName)
+        .then(cache => {
+          cache.put(event.request.url, response.clone());
+          return response;
         });
-      }).catch(error=> {
-        //TODO 6 - RESPOND WITH CUSTOM OFFLINE MESSAGE
-        console.log('Error, ', error);
-        return caches.match('offline.html');
-      })
-    );
+      });
+    }).catch(error => {
+      console.log('Error, ', error);
+      return caches.match('offline.html');
+    })
+  );
 });
