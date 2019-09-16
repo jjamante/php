@@ -3,7 +3,8 @@ const precacheResources = [
   '/',
   'index.html',
   'logo.png',
-  'manifest.json'
+  'manifest.json',
+  'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'
 ];
 
 self.addEventListener('install', event => {
